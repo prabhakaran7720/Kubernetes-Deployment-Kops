@@ -1,4 +1,3 @@
-#configuration file 
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -6,41 +5,44 @@ metadata:
   labels:
     app: vprodb
 spec:
+  replicas: 1
   selector:
     matchLabels:
       app: vprodb
-  replicas: 1
   template:
     metadata:
       labels:
         app: vprodb
     spec:
       containers:
-      - name: vprodb
-        image: vprofile/vprofiledb
-          #args:
-          #- "--ignore-db-dir"
-          #- "lost+found"
-        volumeMounts:
-        - mountPath: /var/lib/mysql
-          name: vpro-db-data
-        ports:
-        - name: vprodb-port
-          containerPort: 3306
-        env:
-         - name: MYSQL_ROOT_PASSWORD
-           valueFrom:
-             secretKeyRef:
-               name: app-secret
-               key: db-pass
+        - name: vprodb
+          image: vprofile/vprofiledb
+          ports:
+            - name: vprodb-port
+              containerPort: 3306
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: app-secret
+                  key: db-pass
+          resources:
+            requests:
+              memory: "512Mi"  # Request 512 megabytes of memory
+              cpu: "0.5"        # Request 0.5 CPU cores
+            limits:
+              memory: "1Gi"     # Limit memory usage to 1 gigabyte
+              cpu: "1"          # Limit CPU usage to 1 core
+          volumeMounts:
+            - mountPath: /var/lib/mysql
+              name: vpro-db-data
       nodeSelector:
         zone: ap-south-1b
       volumes:
         - name: vpro-db-data
-          # This AWS EBS volume must already exist.
           awsElasticBlockStore:
-             volumeID: vol-0784557d9802aa208
-             fsType: ext4
+            volumeID: vol-0784557d9802aa208
+            fsType: ext4
 
       initContainers:
         - name: busybox
