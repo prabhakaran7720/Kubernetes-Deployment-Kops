@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vproapp
+  labels: 
+    app: vproapp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: vproapp
+  template:
+    metadata:
+      labels:
+        app: vproapp
+    spec:
+      containers:
+        - name: vproapp
+          image: prabhakaran7720/vprofileapp:latest
+          ports:
+            - name: vproapp-port
+              containerPort: 8080
+          resources:
+            requests:
+              memory: "512Mi"  # Request 512 megabytes of memory
+              cpu: "0.5"        # Request 0.5 CPU cores
+            limits:
+              memory: "1Gi"     # Limit memory usage to 1 gigabyte
+              cpu: "1"          # Limit CPU usage to 1 core
+      initContainers:
+        - name: init-mydb
+          image: busybox
+          command: ['sh', '-c', 'until nslookup vprodb.$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace).svc.cluster.local; do echo waiting for mydb; sleep 2; done;']
