@@ -17,9 +17,6 @@ spec:
       containers:
         - name: vprodb
           image: prabhakaran7720/vprofiledb:latest
-          volumeMounts:
-            - mountPath: /var/lib/mysql
-              name: vpro-db-data
           ports:
             - name: vprodb-port
               containerPort: 3306
@@ -36,6 +33,9 @@ spec:
             limits:
               memory: "1Gi"     # Limit memory usage to 1 gigabyte
               cpu: "1"          # Limit CPU usage to 1 core
+          volumeMounts:
+            - mountPath: /var/lib/mysql
+              name: vpro-db-data
       nodeSelector:
         zone: ap-south-1b
       volumes:
@@ -47,7 +47,7 @@ spec:
       initContainers:
         - name: busybox
           image: busybox:latest
-          args: ["rm", "-rf", "/var/lib/mysql/lost+found"]
+          command: ["rm", "-rf", "/var/lib/mysql/lost+found"]
           volumeMounts:
             - name: vpro-db-data
               mountPath: /var/lib/mysql
